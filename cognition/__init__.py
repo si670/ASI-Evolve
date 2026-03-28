@@ -1,8 +1,5 @@
-"""
-Evolve Cognition Module
-=======================
-知识库管理，包含 RAG 检索、Embedding 等。
-"""
+"""Cognition storage and retrieval utilities."""
+
 from .cognition import Cognition
 
 __all__ = [

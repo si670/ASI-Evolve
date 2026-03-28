@@ -1,6 +1,5 @@
-"""
-Best snapshot manager for evolution experiments.
-"""
+"""Utilities for persisting the best-scoring step outputs."""
+
 import json
 from pathlib import Path
 from threading import Lock
@@ -10,7 +9,7 @@ from .structures import Node
 
 
 class BestSnapshotManager:
-    """管理 steps/best 历史快照（best/step_x/code + results.json）。"""
+    """Maintain a `steps/best` directory with the strongest snapshots."""
 
     def __init__(self, steps_dir: Path, logger=None):
         self.steps_dir = Path(steps_dir)
@@ -22,11 +21,7 @@ class BestSnapshotManager:
         self._lock = Lock()
 
     def init_from_nodes(self, nodes: List[Node]) -> None:
-        """
-        用历史节点初始化 best 分数基线。
-        - 无历史节点：仅保持目录存在
-        - 有历史节点：仅恢复历史最高分，用于后续比较
-        """
+        """Initialize the best-score tracker from existing nodes."""
         if not nodes:
             return
 
@@ -40,7 +35,7 @@ class BestSnapshotManager:
         step_name: str,
         source_step_dir: Optional[Path] = None,
     ) -> bool:
-        """当出现新最高分时更新快照，返回是否发生更新。"""
+        """Write a new snapshot if the provided node improves on the best score."""
         with self._lock:
             if node.score <= self.best_score:
                 return False
@@ -54,7 +49,7 @@ class BestSnapshotManager:
             return True
 
     def _write_snapshot(self, node: Node, step_name: str, source_step_dir: Optional[Path]) -> None:
-        """写入 best/step_x/code 和 best/step_x/results.json。"""
+        """Persist code and results for a best-performing step."""
         best_step_dir = self.best_dir / step_name
         best_step_dir.mkdir(parents=True, exist_ok=True)
 

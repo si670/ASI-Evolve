@@ -1,11 +1,11 @@
 # Evolve Framework Configuration - Circle Packing
 # ===============================================
-# Single-phase: numerical optimization toward sum of radii 2.635
+# Single-phase setup for numerical refinement toward a sum of radii of 2.635.
 
-# 实验名称
+# Experiment name
 experiment_name: "circle_packing_align_qwen_1"
 
-# API 配置
+# API configuration
 api:
   provider: "sglang"
   base_url: "http://localhost:30032/v1"
@@ -13,18 +13,18 @@ api:
   model: "default"
   temperature: 0.6
   top_p: 0.95
-  max_tokens: 65536  # 输出限制, YaRN扩展后总上下文131072
+  max_tokens: 65536  # YaRN-expanded context limit can reach 131072
   seed: 42
   extra_body:
     chat_template_kwargs:
       enable_thinking: true
     top_k: 20
     min_p: 0
-  timeout: 600  # Longer timeout for optimization
+  timeout: 600  # Longer timeout for optimization-heavy generations
   retry_times: 3
   retry_delay: 5
 
-# 日志配置
+# Logging configuration
 logging:
   level: "INFO"
   console: true
@@ -34,7 +34,7 @@ logging:
     project: "evolve"
     entity: "hz-czar-sjtu"
 
-# Pipeline 配置
+# Pipeline configuration
 pipeline:
   agents:
     manager: false
@@ -43,30 +43,26 @@ pipeline:
     analyzer: true
 
   researcher:
-    diff_based_evolution: false  # Full rewrites (same as openevolve circle_packing)
+    diff_based_evolution: false  # Full rewrites, aligned with openevolve circle_packing
     max_code_length: 100000
-  
+
   max_retries:
     researcher: 3
     engineer: 2
     analyzer: 2
 
-  # Engineer 超时时间（秒）
-  engineer_timeout: 300  # 5分钟
+  engineer_timeout: 300  # 5 minutes
 
-  # 并行配置
   parallel:
-    num_workers: 4  # 并行 worker 数量
+    num_workers: 4
 
-  # 采样配置
-  sample_n: 3  # 每个 step 从历史节点中采样的数量
+  sample_n: 3
 
-  # Judge 配置
   judge:
-    enabled: false  # 可以根据需要启用 LLM Judge
+    enabled: false
     ratio: 0.2
 
-# Cognition 配置
+# Cognition configuration
 cognition:
   storage_dir: "cognition_data"
   embedding:
@@ -75,34 +71,31 @@ cognition:
   faiss:
     index_type: "IP"
   retrieval:
-    top_k: 5  # More historical context
-    score_threshold: 0.4  # Higher threshold for better quality
+    top_k: 5
+    score_threshold: 0.4
   web_search:
     enabled: false
 
-# Database 配置
+# Database configuration
 database:
   storage_dir: "database_data"
-  max_size: 70  # 对应 openevolve 的 population_size
+  max_size: 70  # Matches the openevolve population size used in this setup
   embedding:
     model: "sentence-transformers/all-MiniLM-L6-v2"
     dimension: 384
   sampling:
-    algorithm: "island"  # 使用岛屿算法（MAP-Elites）
-    # 岛屿算法参数
+    algorithm: "island"
     island:
-      num_islands: 5  # 岛屿数量（对应 openevolve phase_2）
-      migration_interval: 10  # 迁移间隔（每隔多少代进行一次迁移）
-      migration_rate: 0.1  # 迁移比例（每次迁移的程序比例）
-      exploration_ratio: 0.2  # 探索采样概率（随机采样，增加多样性）
-      exploitation_ratio: 0.6  # 开发采样概率（从精英档案采样，对应 openevolve phase_2）
-      # MAP-Elites 特征配置
-      # feature_dimensions 指定从 engineer 返回的 results 中哪些字段作为特征维度
-      # openevolve 默认使用 ["complexity", "diversity"]
-      # - "complexity": 代码长度（built-in，由框架自动计算）
-      # - "diversity": 代码结构多样性（built-in，由框架自动计算）
-      # 也可以使用自定义特征，例如：["complexity", "eval_time"]（如果 engineer 返回了 eval_time）
-      feature_dimensions: ["complexity", "diversity"]  # 对应 openevolve 的默认配置
-      feature_bins: 10  # 每个特征维度的网格数量
+      num_islands: 5
+      migration_interval: 10
+      migration_rate: 0.1
+      exploration_ratio: 0.2
+      exploitation_ratio: 0.6
+      # MAP-Elites-style feature configuration
+      # Feature values are read from the engineer results or computed by the framework.
+      # - complexity: built-in code-length feature
+      # - diversity: built-in structural diversity feature
+      feature_dimensions: ["complexity", "diversity"]
+      feature_bins: 10
   faiss:
     index_type: "IP"

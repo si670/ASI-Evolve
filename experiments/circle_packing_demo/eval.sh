@@ -7,10 +7,10 @@
 #
 # Expected file structure:
 #   experiments/experiment_name/
-#   ├── eval.sh           (this script)
-#   ├── evaluator.py     (evaluation logic, aligned with openevolve)
-#   └── steps/
-#       └── step_N          (step results)
+#   |-- eval.sh           (this script)
+#   |-- evaluator.py     (evaluation logic, aligned with openevolve)
+#   `-- steps/
+#       `-- step_N        (step results)
 #
 # Output:
 #   step_N/results.json   (evaluation metrics)
@@ -51,7 +51,7 @@ handle_error() {
     }
 }
 EOF
-    exit 0  # Return 0 so framework continues
+    exit 0
 }
 trap 'if [ $? -ne 0 ]; then handle_error; fi' EXIT
 
@@ -71,20 +71,18 @@ if [ ! -f "$EVALUATOR_PY" ]; then
     exit 1
 fi
 
-# Run evaluation using evaluator.py
 echo "Running evaluation..." >> "$LOG_FILE"
 python3 "$EVALUATOR_PY" "$SRC_CODE_FILE" "$RESULT_JSON" >> "$LOG_FILE" 2>&1
 
 echo "Evaluation complete." >> "$LOG_FILE"
 
-# Print summary (aligned with openevolve)
 if [ -f "$RESULT_JSON" ]; then
     sum_radii=$(python3 -c "import json; print(json.load(open('$RESULT_JSON')).get('sum_radii', 0.0))")
     target_ratio=$(python3 -c "import json; print(json.load(open('$RESULT_JSON')).get('target_ratio', 0.0))")
     combined_score=$(python3 -c "import json; print(json.load(open('$RESULT_JSON')).get('combined_score', 0.0))")
     validity=$(python3 -c "import json; print(json.load(open('$RESULT_JSON')).get('validity', 0.0))")
     eval_time=$(python3 -c "import json; print(json.load(open('$RESULT_JSON')).get('eval_time', 0.0))")
-    
+
     echo "Results:"
     echo "  Sum of radii: ${sum_radii}"
     echo "  Target ratio: ${target_ratio}"

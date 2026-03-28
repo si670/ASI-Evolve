@@ -1,6 +1,5 @@
-"""
-贪心采样算法
-"""
+"""Greedy sampling strategy."""
+
 from typing import List, TYPE_CHECKING
 
 from .base import BaseSampler
@@ -10,8 +9,8 @@ if TYPE_CHECKING:
 
 
 class GreedySampler(BaseSampler):
-    """贪心采样（按分数降序）"""
-    
+    """Return the highest-scoring nodes first."""
+
     def sample(self, nodes: List["Node"], n: int) -> List["Node"]:
         if not nodes:
             return []

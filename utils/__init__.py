@@ -1,8 +1,5 @@
-"""
-Evolve Utils Module
-===================
-各种工具组件，包括 LLM 调用、日志、Prompt 管理、数据结构等。
-"""
+"""Shared utility helpers for ASI-Evolve."""
+
 from .llm import LLMClient, create_llm_client
 from .logger import EvolveLogger, get_logger, init_logger
 from .prompt import PromptManager

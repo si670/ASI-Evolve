@@ -1,6 +1,5 @@
-"""
-Embedding 服务
-"""
+"""Embedding service wrapper."""
+
 from typing import List, Union
 
 import numpy as np
@@ -13,12 +12,8 @@ except ImportError:
 
 
 class EmbeddingService:
-    """
-    本地 Embedding 服务。
-    
-    使用 sentence-transformers 进行文本向量化。
-    """
-    
+    """Local embedding service backed by sentence-transformers."""
+
     def __init__(
         self,
         model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
@@ -26,44 +21,44 @@ class EmbeddingService:
     ):
         """
         Args:
-            model_name: 模型名称
-            device: 运行设备 (cpu/cuda)
+            model_name: Embedding model name.
+            device: Runtime device (`cpu` or `cuda`).
         """
         if not ST_AVAILABLE:
             raise ImportError(
                 "sentence-transformers not installed. "
                 "Run: pip install sentence-transformers"
             )
-        
+
         self.model = SentenceTransformer(model_name, device=device)
         self.dimension = self.model.get_sentence_embedding_dimension()
-    
+
     def encode(
         self,
         texts: Union[str, List[str]],
         normalize: bool = True,
     ) -> np.ndarray:
         """
-        将文本编码为向量。
-        
+        Encode text into embedding vectors.
+
         Args:
-            texts: 单个文本或文本列表
-            normalize: 是否 L2 归一化
-            
+            texts: A single string or a list of strings.
+            normalize: Whether to L2-normalize embeddings.
+
         Returns:
-            向量数组 (n, dimension)
+            Array of shape `(n, dimension)`.
         """
         if isinstance(texts, str):
             texts = [texts]
-        
+
         embeddings = self.model.encode(
             texts,
             normalize_embeddings=normalize,
             show_progress_bar=False,
         )
-        
+
         return np.array(embeddings, dtype=np.float32)
-    
+
     def get_dimension(self) -> int:
-        """获取向量维度"""
+        """Return the embedding dimension."""
         return self.dimension

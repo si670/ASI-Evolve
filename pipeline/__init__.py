@@ -1,8 +1,5 @@
-"""
-Evolve Pipeline Module
-======================
-完整的实验 Pipeline，包含各 Agent 模块。
-"""
+"""Pipeline entry points for ASI-Evolve."""
+
 from .main import Pipeline
 
 __all__ = [

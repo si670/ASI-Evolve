@@ -1,6 +1,5 @@
-"""
-采样器基类
-"""
+"""Base interface for node samplers."""
+
 from abc import ABC, abstractmethod
 from typing import List, TYPE_CHECKING
 
@@ -9,38 +8,36 @@ if TYPE_CHECKING:
 
 
 class BaseSampler(ABC):
-    """采样器基类"""
-    
+    """Abstract sampler used by the experiment database."""
+
     @abstractmethod
     def sample(self, nodes: List["Node"], n: int) -> List["Node"]:
         """
-        从节点列表中采样。
-        
+        Sample a subset of nodes.
+
         Args:
-            nodes: 所有节点
-            n: 需要采样的数量
-            
+            nodes: All candidate nodes.
+            n: Number of nodes to return.
+
         Returns:
-            采样的节点列表
+            A list of sampled nodes.
         """
         pass
-    
+
     def on_node_added(self, node: "Node") -> None:
         """
-        当新节点被添加时的回调。
-        
-        子类可以重写此方法来处理新节点的逻辑（如岛屿分配）。
-        
+        Hook called when a node is added.
+
         Args:
-            node: 新添加的节点
+            node: The newly added node.
         """
         pass
-    
+
     def on_node_removed(self, node: "Node") -> None:
         """
-        当节点被移除时的回调。
-        
+        Hook called when a node is removed.
+
         Args:
-            node: 被移除的节点
+            node: The removed node.
         """
         pass

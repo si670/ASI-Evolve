@@ -386,9 +386,9 @@ if __name__ == "__main__":
     
     # Print summary
     if result.get("success", False):
-        print(f"✓ Valid packing: sum_radii = {result['sum_radii']:.6f}")
+        print(f"[OK] Valid packing: sum_radii = {result['sum_radii']:.6f}")
         print(f"  Target ratio: {result['target_ratio']:.6f}")
         print(f"  Combined score: {result['combined_score']:.6f}")
     else:
         error_msg = result.get("error", "Invalid packing")
-        print(f"✗ Invalid packing: {error_msg}")
+        print(f"[FAIL] Invalid packing: {error_msg}")

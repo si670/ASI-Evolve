@@ -1,6 +1,5 @@
-"""
-Agent 基类
-"""
+"""Shared base class for pipeline agents."""
+
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
@@ -10,12 +9,8 @@ from ..utils.logger import get_logger
 
 
 class BaseAgent(ABC):
-    """
-    Agent 基类。
-    
-    所有 Agent 都继承此类，实现 run 方法。
-    """
-    
+    """Base implementation shared by all agent roles."""
+
     def __init__(
         self,
         llm: LLMClient,
@@ -26,34 +21,33 @@ class BaseAgent(ABC):
         self.prompt_manager = prompt_manager
         self.name = name
         self.logger = get_logger()
-        self.step_dir = None  # Step 目录，用于记录 LLM 调用日志
-    
+        self.step_dir = None
+
     def set_step_dir(self, step_dir):
         """
-        设置 step 目录，用于记录 LLM 调用日志。
-        
+        Set the current step directory for agent-local logs.
+
         Args:
-            step_dir: Step 目录路径
+            step_dir: Path to the active step directory.
         """
         from pathlib import Path
         self.step_dir = Path(step_dir) if step_dir else None
         if self.step_dir:
-            # 创建 llm_logs 子目录
             log_dir = self.step_dir / "llm_logs"
             self.llm.set_log_dir(log_dir)
-    
+
     @abstractmethod
     def run(self, **kwargs) -> Dict[str, Any]:
         """
-        执行 Agent 任务。
-        
+        Execute the agent.
+
         Returns:
-            包含结果的字典
+            Agent-specific output.
         """
         pass
-    
+
     def get_prompt(self, template_name: str, **context) -> str:
-        """获取渲染后的 prompt（优先用户目录，回退到 utils/prompts/）"""
+        """Render a prompt template from the configured prompt manager."""
         if self.prompt_manager.has_template(template_name):
             return self.prompt_manager.render(template_name, **context)
         raise ValueError(f"No prompt template found for: {template_name}")

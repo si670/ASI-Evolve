@@ -1,6 +1,5 @@
-"""
-随机采样算法
-"""
+"""Random sampling strategy."""
+
 import random
 from typing import List, TYPE_CHECKING
 
@@ -11,8 +10,8 @@ if TYPE_CHECKING:
 
 
 class RandomSampler(BaseSampler):
-    """随机采样"""
-    
+    """Sample nodes uniformly at random."""
+
     def sample(self, nodes: List["Node"], n: int) -> List["Node"]:
         if not nodes:
             return []

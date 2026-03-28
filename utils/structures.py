@@ -1,6 +1,5 @@
-"""
-数据结构定义
-"""
+"""Core data structures used across the framework."""
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -10,21 +9,22 @@ from datetime import datetime
 @dataclass
 class Node:
     """
-    数据库中的实验节点。
-    
+    One evolution node stored in the database.
+
     Attributes:
-        name: 节点名字
-        created_at: 创建时间戳
-        parent: 来自于哪些节点的索引列表
-        motivation: 动机分析以及期待的效果
-        code: 具体代码
-        results: 具体的结果字典
-        analysis: 分析结果，有什么可以汲取的经验
-        meta_info: 用于后续添加杂项记录
-        id: 节点唯一标识（由数据库分配）
-        visit_count: 访问次数（用于 UCB1）
-        score: 评分
+        name: Node name.
+        created_at: ISO timestamp.
+        parent: Parent node ids.
+        motivation: Natural-language rationale for the candidate.
+        code: Generated program.
+        results: Structured evaluation results.
+        analysis: Analyzer summary.
+        meta_info: Auxiliary metadata.
+        id: Unique identifier assigned by the database.
+        visit_count: Number of times the node has been sampled.
+        score: Scalar score used for ranking and sampling.
     """
+
     name: str = ""
     created_at: str = ""
     parent: List[int] = field(default_factory=list)
@@ -36,13 +36,13 @@ class Node:
     id: Optional[int] = None
     visit_count: int = 0
     score: float = 0.0
-    
+
     def __post_init__(self):
         if not self.created_at:
             self.created_at = datetime.now().isoformat()
-    
+
     def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
+        """Serialize the node to a dictionary."""
         return {
             "id": self.id,
             "name": self.name,
@@ -56,10 +56,10 @@ class Node:
             "visit_count": self.visit_count,
             "score": self.score,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Node":
-        """从字典创建"""
+        """Create a node from a dictionary."""
         return cls(
             id=data.get("id"),
             name=data.get("name", ""),
@@ -73,9 +73,9 @@ class Node:
             visit_count=data.get("visit_count", 0),
             score=data.get("score", 0.0),
         )
-    
+
     def get_context_text(self) -> str:
-        """获取用于 embedding 的文本"""
+        """Return the text used for similarity search."""
         parts = [self.name, self.motivation, self.analysis]
         return " ".join(p for p in parts if p)
 
@@ -83,19 +83,20 @@ class Node:
 @dataclass
 class CognitionItem:
     """
-    Cognition 知识库中的条目。
-    
+    One item stored in the cognition base.
+
     Attributes:
-        id: 唯一标识
-        content: 内容
-        source: 来源（如论文标题、URL等）
-        metadata: 元信息
+        id: Unique identifier.
+        content: Stored text.
+        source: Optional provenance metadata.
+        metadata: Extra attributes.
     """
+
     content: str
     source: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)
     id: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
@@ -103,7 +104,7 @@ class CognitionItem:
             "source": self.source,
             "metadata": self.metadata,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "CognitionItem":
         return cls(
@@ -116,13 +117,14 @@ class CognitionItem:
 
 @dataclass
 class ExperimentConfig:
-    """实验配置"""
+    """Resolved experiment configuration."""
+
     name: str
     experiment_dir: Path = None
-    input_file: Optional[str] = None  # 任务描述文件
-    eval_script: Optional[str] = None  # 评估脚本
-    run_script: Optional[str] = None   # 运行脚本
-    
+    input_file: Optional[str] = None
+    eval_script: Optional[str] = None
+    run_script: Optional[str] = None
+
     def __post_init__(self):
         from pathlib import Path
         if self.experiment_dir is None:
@@ -132,9 +134,10 @@ class ExperimentConfig:
             self.experiment_dir = Path(self.experiment_dir)
 
 
-@dataclass  
+@dataclass
 class LLMResponse:
-    """LLM 响应结构"""
+    """Structured LLM response payload."""
+
     content: str
     raw_response: Any = None
     usage: Dict[str, int] = field(default_factory=dict)

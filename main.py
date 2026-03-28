@@ -1,26 +1,41 @@
 #!/usr/bin/env python3
 """
-Evolve Framework
-================
-自动化实验进化框架的主入口。
+ASI-Evolve command-line entry point.
 
 Usage:
-    # 使用默认配置运行
     python main.py
-    
-    # 指定实验名和步数
     python main.py --experiment my_exp --steps 20
-    
-    # 指定配置文件
     python main.py --config path/to/config.yaml
 """
+
 import argparse
+import importlib.util
 import sys
 from pathlib import Path
 
-# 添加项目根目录的父目录到 path，使 Evolve 可以作为包导入
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
+
+def _bootstrap_package() -> None:
+    """Register the repository root as the importable `Evolve` package."""
+    project_root = Path(__file__).resolve().parent
+    package_name = "Evolve"
+
+    if package_name in sys.modules:
+        return
+
+    spec = importlib.util.spec_from_file_location(
+        package_name,
+        project_root / "__init__.py",
+        submodule_search_locations=[str(project_root)],
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError("Failed to bootstrap the 'Evolve' package")
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[package_name] = module
+    spec.loader.exec_module(module)
+
+
+_bootstrap_package()
 
 from Evolve.pipeline import Pipeline
 
@@ -29,67 +44,63 @@ def main():
     parser = argparse.ArgumentParser(
         description="Evolve Framework - Automated Experiment Evolution"
     )
-    
+
     parser.add_argument(
         "--config",
         type=str,
         default=None,
         help="Path to config file (default: config.yaml)",
     )
-    
+
     parser.add_argument(
         "--experiment",
         type=str,
         default=None,
         help="Experiment name (overrides config)",
     )
-    
+
     parser.add_argument(
         "--steps",
         type=int,
         default=10,
         help="Number of evolution steps (default: 10)",
     )
-    
+
     parser.add_argument(
         "--sample-n",
         type=int,
         default=3,
         help="Number of nodes to sample per step (default: 3)",
     )
-    
+
     parser.add_argument(
         "--eval-script",
         type=str,
         default=None,
         help="Path to evaluation script",
     )
-    
+
     args = parser.parse_args()
-    
-    # 初始化 Pipeline
+
     pipeline = Pipeline(
         config_path=args.config,
         experiment_name=args.experiment,
     )
-    
-    # 运行
+
     pipeline.run(
         max_steps=args.steps,
         eval_script=args.eval_script,
         sample_n=args.sample_n,
     )
-    
-    # 输出统计
+
     stats = pipeline.get_stats()
     print("\n=== Statistics ===")
     for key, value in stats.items():
         print(f"{key}: {value}")
-    
-    # 输出最佳节点
+
     best = pipeline.get_best_node()
     if best:
-        print(f"\n=== Best Node ===")
+        print("\n=== Best Node ===")
         print(f"Name: {best.name}")
         print(f"Score: {best.score:.4f}")
         print(f"Motivation: {best.motivation[:200]}...")
