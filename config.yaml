@@ -1,0 +1,129 @@
+# Evolve Framework Configuration (Default Template)
+# ================================================
+# 这是默认配置模板，实验目录下的 config.yaml 会覆盖这里的设置
+# 优先级: 实验目录 config.yaml > 根目录 config.yaml
+
+# 实验名称
+experiment_name: "default"
+
+# API 配置
+# 建议在实验目录下的 config.yaml 中配置实际的 API 信息
+api:
+  provider: "openai"  # 支持 openai 兼容接口
+  base_url: "your_base_url"  # 默认本地服务
+  api_key: "your_api_key"  # 从环境变量读取，或在实验 config 中覆盖
+  model: "your_model"
+  temperature: 0
+  top_p: 0.8
+  max_tokens: 16384
+  seed: 42
+  timeout: 300
+  retry_times: 3
+  retry_delay: 5
+
+# 日志配置
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  console: true
+  wandb:
+    enabled: true
+    offline: false  # 离线模式，运行后用 wandb sync 上传
+    project: "evolve"
+    entity: ""  # 在实验 config 中设置你的 team
+
+# Pipeline 配置
+pipeline:
+  # 各 Agent 开关
+  agents:
+    manager: false     # 不使用 Meta Prompter，手动提供 prompts
+    researcher: true   # 代码生成
+    engineer: true     # 运行实验
+    analyzer: true     # 分析结果
+  
+  # Researcher 配置
+  researcher:
+    # 增量更新模式：使用 diff 修改而不是全量重新生成
+    # 开启后，会从历史节点中采样一个作为 base，模型直接输出 diff 修改
+    # 关闭时，模型会完整生成新的代码
+    diff_based_evolution: true  # 默认开启
+    
+    # diff 模式的正则匹配模式
+    diff_pattern: "<<<<<<< SEARCH\\n(.*?)=======\\n(.*?)>>>>>>> REPLACE"
+    
+    # 最大代码长度限制
+    max_code_length: 10000
+  
+  # 重试次数
+  max_retries:
+    researcher: 3
+    engineer: 2
+    analyzer: 2
+
+  # Engineer 超时时间（秒）
+  engineer_timeout: 1800  # 30 分钟，超时后会终止实验脚本并标记失败
+
+  # 并行配置
+  parallel:
+    num_workers: 1  # 并行 worker 数量，1=顺序执行，>1=并行执行
+    # 建议值：
+    # - 1: 顺序执行，适合调试
+    # - 2-4: 并行加速，适合生产环境
+    # - >4: 需要足够的 API quota 和计算资源
+
+  # 采样配置
+  sample_n: 3  # 每个 step 从历史节点中采样的数量
+
+  # LLM Judge 配置
+  # 开启后会在 eval 脚本之后使用 LLM 进行额外打分
+  # 最终分数 = (1 - judge_ratio) * eval_score + judge_ratio * judge_score
+  judge:
+    enabled: false      # 是否启用 LLM Judge
+    ratio: 0.2          # Judge 分数权重，默认 0.2（eval 占 0.8，judge 占 0.2）
+    # 启用 judge 时需要在实验的 prompts 目录下提供 judge.jinja2 模板
+
+# Cognition 配置
+cognition:
+  # 本地存储路径 (相对于实验目录)
+  storage_dir: "cognition_data"
+  # Embedding 模型
+  embedding:
+    model: "sentence-transformers/all-MiniLM-L6-v2"
+    dimension: 384
+  # FAISS 配置
+  faiss:
+    index_type: "IP"  # IP (cosine) or L2
+  # RAG 检索
+  retrieval:
+    top_k: 3
+    score_threshold: 0.3
+  # 联网搜索 (暂不实现)
+  web_search:
+    enabled: false
+
+# Database 配置
+database:
+  # 本地存储路径 (相对于实验目录)
+  storage_dir: "database_data"
+  # 数据库大小上限（默认无限制）
+  # 如果设置了此参数，当数据库中的节点数超过此值时，会自动移除 score 最低的节点
+  # 如果多个节点 score 相同，则移除 id 最小的（先加入的）节点
+  max_size: null  # 例如设置为 100 表示最多保留 100 个节点
+  # Embedding 配置 (用于相似度搜索)
+  embedding:
+    model: "sentence-transformers/all-MiniLM-L6-v2"
+    dimension: 384
+  # 采样算法
+  sampling:
+    algorithm: "ucb1"  # ucb1, random, greedy, island
+    ucb1_c: 1.414  # UCB1 探索参数
+    # 岛屿算法参数 (仅当 algorithm: "island" 时生效)
+    island:
+      num_islands: 5           # 岛屿数量
+      migration_interval: 10   # 迁移间隔（每隔多少代进行一次迁移）
+      migration_rate: 0.1      # 迁移比例（每次迁移的程序比例，选择最优的）
+      exploration_ratio: 0.2   # 探索采样概率（随机采样，增加多样性）
+      exploitation_ratio: 0.3  # 开发采样概率（从精英档案采样）
+      # 剩余概率 (1 - exploration - exploitation) 用于加权采样
+  # FAISS 配置  
+  faiss:
+    index_type: "IP"
