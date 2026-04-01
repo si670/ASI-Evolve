@@ -8,7 +8,12 @@ That's ASI-Evolve. It is a general agentic framework that closes the loop betwee
 We built it for AI research. But the loop doesn't care about domain.  
 A financial analyst, a biomedical engineer, a climate scientist, or a game developer can all plug their own problem into ASI-Evolve and let it search for better solutions than any human has time to manually explore.
 
-[![Paper](https://img.shields.io/badge/Paper-ASI--Evolve-blue?style=flat&logo=googledocs&logoColor=white)](https://github.com/GAIR-NLP/ASI-Evolve/blob/main/assets/paper.pdf) &nbsp; SJTU / SII / GAIR
+<div align="center">
+
+[![Paper](https://img.shields.io/badge/Paper-ASI--Evolve-blue?style=flat&logo=googledocs&logoColor=white)](https://github.com/GAIR-NLP/ASI-Evolve/blob/main/assets/paper.pdf)
+[![arXiv](https://img.shields.io/badge/arXiv-2603.29640-b31b1b?style=flat&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2603.29640)
+
+</div>
 
 ---
 
@@ -29,16 +34,14 @@ These are not toy benchmarks. These are real, frontier-level results — produce
 
 ## The Core Loop (Works in Any Domain)
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  1. LEARN    — retrieve relevant prior knowledge         │
-│  2. DESIGN   — propose the next candidate program/idea   │
-│  3. EXPERIMENT — run it, collect metrics                 │
-│  4. ANALYZE  — turn results into reusable lessons        │
-│                        ↓                                 │
-│              repeat → get better each round              │
-└─────────────────────────────────────────────────────────┘
-```
+| Step | Action |
+|---|---|
+| 1 | **LEARN** — retrieve relevant prior knowledge |
+| 2 | **DESIGN** — propose the next candidate program/idea |
+| 3 | **EXPERIMENT** — run it and collect metrics |
+| 4 | **ANALYZE** — turn results into reusable lessons |
+
+> Repeat the loop and improve each round.
 
 Three agents drive this loop:
 
@@ -258,7 +261,7 @@ python main.py \
   --eval-script /path/to/experiments/circle_packing_demo/eval.sh
 ```
 
-ASI-Evolve reaches SOTA-level circle-packing results in as few as **17 rounds**, outpacing OpenEvolve and GEPA.
+ASI-Evolve reaches SOTA-level circle-packing results in as few as **17 rounds**.
 
 ---
 
